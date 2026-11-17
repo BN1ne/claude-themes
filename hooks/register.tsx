@@ -131,13 +131,10 @@ export const register: Register = on => {
     const still = scene.endsWith('-still')
     const theme = THEMES[still ? scene.slice(0, -6) : scene]
     if (!theme) return next(e)
-    const { Shader, Svg } = $.ui.resolve(e)
+    const { Svg } = $.ui.resolve(e)
     if (still) return <Svg source={theme.sceneStill} alt={theme.alt} />
-    // El shader dibuja la escena viva; el Svg es su respaldo donde no hay shaders.
-    return (
-      <Shader module="./mosaic-shader.ts">
-        <Svg source={theme.scene} alt={theme.alt} />
-      </Shader>
-    )
+    // La app no tiene elemento Shader: la escena viva es el Svg con su animación CSS.
+    // isInteractive lo dibuja en un marco aislado, donde las animaciones corren.
+    return <Svg source={theme.scene} alt={theme.alt} isInteractive />
   })
 }
