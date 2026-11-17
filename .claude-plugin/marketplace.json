@@ -1,0 +1,6 @@
+{
+  "name": "claude-themes",
+  "description": "Temas de BN1ne para Claude Code",
+  "owner": { "name": "BN1ne" },
+  "plugins": [{ "name": "my-themes", "source": "./" }]
+}
