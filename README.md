@@ -37,7 +37,7 @@ Tu elección se recuerda entre sesiones. Si Windows o macOS tienen activado "red
 
 ## Consumo de recursos
 
-La escena es un SVG animado sin scripts. Cada tiburón se dibuja una vez, recto, y se corta en una tajada por columna de celdas. Cada tajada se mece arriba y abajo con un retraso que crece hacia la cola, así una onda recorre el cuerpo. El tiburón entero sigue una curva cerrada y suave (`animateMotion` con `rotate="auto"`), así gira donde gira la curva.
+La escena es un SVG animado sin scripts. Cada tiburón se dibuja una vez, recto, y se corta en una tajada por columna de celdas. Cada tajada se mece arriba y abajo con un retraso que crece hacia la cola, así una onda recorre el cuerpo. El tiburón entero sigue una curva cerrada y suave (animación CSS, sin SMIL), así gira donde gira la curva.
 
 Con "reducir movimiento" la animación se detiene. `/my-themes mosaico quieto` usa una versión congelada, sin animación.
 

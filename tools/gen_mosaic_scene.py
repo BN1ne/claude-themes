@@ -7,8 +7,9 @@ Fluid motion, without script or shader:
 - each shark is rasterised once, straight, nose toward +x;
 - it is cut into one slice per cell column, and every slice sways up and down
   with a delay that grows toward the tail, so a wave runs along the body;
-- the whole shark follows a smooth closed curve (SMIL animateMotion,
-  rotate="auto"), so it turns where the curve turns.
+- the whole shark follows a smooth closed curve, turned to face along it,
+  through CSS keyframes sampled at even speed (no SMIL: the app's frame may
+  not run it).
 
     python tools/gen_mosaic_scene.py hooks/mosaic-scene [--svg]
 """
@@ -151,17 +152,29 @@ def route(fx, fy, px, py, hx, hy):
     return at
 
 
-def path_d(at, n=72):
-    """Smooth closed path: Catmull-Rom through n samples, as cubic Béziers."""
-    pts = [at(2 * math.pi * i / n) for i in range(n)]
-    d = [f"M{pts[0][0]:.0f} {pts[0][1]:.0f}"]
-    for i in range(n):
-        p0, p1, p2, p3 = pts[i - 1], pts[i], pts[(i + 1) % n], pts[(i + 2) % n]
-        c1 = (p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6)
-        c2 = (p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6)
-        d.append(f"C{c1[0]:.0f} {c1[1]:.0f} {c2[0]:.0f} {c2[1]:.0f} {p2[0]:.0f} {p2[1]:.0f}")
-    length = sum(math.dist(at(2 * math.pi * i / 2000), at(2 * math.pi * (i + 1) / 2000)) for i in range(2000))
-    return "".join(d), length
+def route_keyframes(at, n=150, dense=6000):
+    """CSS keyframes that carry a shark along the loop at even speed, turned to face
+    along it (plain CSS transforms: the app's frame may not run SMIL)."""
+    pts = [at(2 * math.pi * i / dense) for i in range(dense + 1)]
+    cum = [0.0]
+    for a, b in zip(pts, pts[1:]):
+        cum.append(cum[-1] + math.dist(a, b))
+    length = cum[-1]
+    out, j, prev = [], 0, None
+    for k in range(n + 1):
+        target = length * k / n
+        while j < dense - 1 and cum[j + 1] < target:
+            j += 1
+        (x0, y0), (x1, y1) = pts[j], pts[j + 1]
+        f = (target - cum[j]) / max(cum[j + 1] - cum[j], 1e-9)
+        x, y = x0 + (x1 - x0) * f, y0 + (y1 - y0) * f
+        ang = math.degrees(math.atan2(y1 - y0, x1 - x0))
+        if prev is not None:   # unwrap, so the shark never spins the long way round
+            ang += 360 * round((prev - ang) / 360)
+        prev = ang
+        pct = f"{100 * k / n:.2f}".rstrip("0").rstrip(".")
+        out.append(f"{pct}%{{transform:translate({x:.0f}px,{y:.0f}px) rotate({ang:.0f}deg)}}")
+    return "".join(out), length
 
 
 # L px, tint, hammer, route (fx, fy, phase x, phase y, harmonic x, harmonic y), speed px/s, sway period s
@@ -205,12 +218,12 @@ for i, (L, tint, hammer, rt, speed, period) in enumerate(SHARKS):
         off = amp * math.sin(t_still * 7 - s * WAVE)
         slices_still.append(f'<g transform="translate(0 {off:.1f})">{body}</g>' if abs(off) >= 0.5 else body)
     at = route(*rt)
-    d, length = path_d(at)
+    frames, length = route_keyframes(at)
     dur = length / speed
-    begin = -random.uniform(0, dur)
+    css.append(f"@keyframes p{i}{{{frames}}}")
     live.append(
-        f'<g><animateMotion dur="{dur:.1f}s" begin="{begin:.1f}s" repeatCount="indefinite" rotate="auto" '
-        f'path="{d}"/>{"".join(slices_live)}</g>')
+        f'<g style="animation:p{i} {dur:.1f}s linear {-random.uniform(0, dur):.1f}s infinite">'
+        f'{"".join(slices_live)}</g>')
     # still: the shark at one point of its route, facing along it
     (x0, y0), (x1, y1) = at(t_still), at(t_still + 0.002)
     ang = math.degrees(math.atan2(y1 - y0, x1 - x0))
