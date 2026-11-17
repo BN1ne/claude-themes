@@ -37,13 +37,13 @@ Tu elección se recuerda entre sesiones. Si Windows o macOS tienen activado "red
 
 ## Consumo de recursos
 
-En la app de escritorio la escena es un shader que corre en la tarjeta gráfica a 30 cuadros por segundo. La forma de los tiburones se calcula una vez por celda de la cuadrícula, no por pixel. El validador estima unos 2 ms por cuadro en una tarjeta rápida y 8 ms en una débil.
+La escena es un SVG animado sin scripts. Cada tiburón se dibuja una vez, recto, y se corta en una tajada por columna de celdas. Cada tajada se mece arriba y abajo con un retraso que crece hacia la cola, así una onda recorre el cuerpo. El tiburón entero sigue una curva cerrada y suave (`animateMotion` con `rotate="auto"`), así gira donde gira la curva.
 
-Donde no hay shaders (el móvil, "reducir movimiento" o un equipo lento) la app muestra sola una versión SVG animada con CSS, que avanza a saltos. `/my-themes mosaico quieto` usa esa versión congelada, sin animación.
+Con "reducir movimiento" la animación se detiene. `/my-themes mosaico quieto` usa una versión congelada, sin animación.
 
 ## Créditos
 
-La técnica de dibujar los tiburones celda por celda, con la rampa de caracteres `:;t%SX8#@` y los cardúmenes de rayitas, está adaptada de [stackedlol/ascii-sharks](https://github.com/stackedlol/ascii-sharks) (MIT, Copyright (c) 2026 drewdi). El shader está en `hooks/mosaic-shader.ts` (con una vista previa en `tools/preview_mosaic_shader.py`) y la versión SVG se genera con `tools/gen_mosaic_scene.py`.
+La técnica de dibujar los tiburones celda por celda, con la rampa de caracteres `:;t%SX8#@` y los cardúmenes de rayitas, está adaptada de [stackedlol/ascii-sharks](https://github.com/stackedlol/ascii-sharks) (MIT, Copyright (c) 2026 drewdi). La escena se genera con `python tools/gen_mosaic_scene.py hooks/mosaic-scene`. `hooks/mosaic-shader.ts` es una versión con shader que la app todavía no puede dibujar (no tiene elemento `Shader`); queda guardada pero no se carga.
 
 ## Licencia
 

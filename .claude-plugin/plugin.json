@@ -1,6 +1,6 @@
 {
   "name": "my-themes",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Tus temas para Claude: tiburones de mosaico ASCII (claro). Se activan con /my-themes",
   "author": { "name": "BN1ne" },
   "license": "MIT"
