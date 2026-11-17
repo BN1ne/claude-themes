@@ -6,7 +6,7 @@ Temas para las apps de escritorio y móvil de Claude Code, con un comando para a
 
 | Tema | Descripción |
 | --- | --- |
-| `mosaico` | Tiburones de mosaico ASCII que nadan sobre papel cuadriculado, con un resplandor suave al centro. Modo claro. |
+| `mosaico` | Tiburones de mosaico ASCII (clásico, martillo y café moteado) que nadan en curvas sobre papel cuadriculado, con el cuerpo doblándose al girar, cardúmenes de rayitas y un resplandor alrededor del cuadro de texto. Modo claro. |
 
 Los temas se ven en la app de escritorio y en el móvil. La terminal no dibuja temas.
 
@@ -37,11 +37,13 @@ Tu elección se recuerda entre sesiones. Si Windows o macOS tienen activado "red
 
 ## Consumo de recursos
 
-El fondo es un SVG animado solo con CSS, sin JavaScript. Todo avanza a saltos de cuadrícula: unos pocos redibujos por segundo, no 60.
+En la app de escritorio la escena es un shader que corre en la tarjeta gráfica a 30 cuadros por segundo. La forma de los tiburones se calcula una vez por celda de la cuadrícula, no por pixel. El validador estima unos 2 ms por cuadro en una tarjeta rápida y 8 ms en una débil.
+
+Donde no hay shaders (el móvil, "reducir movimiento" o un equipo lento) la app muestra sola una versión SVG animada con CSS, que avanza a saltos. `/my-themes mosaico quieto` usa esa versión congelada, sin animación.
 
 ## Créditos
 
-La técnica de dibujar los tiburones celda por celda, con la rampa de caracteres `:;t%SX8#@` y los cardúmenes de rayitas, está adaptada de [stackedlol/ascii-sharks](https://github.com/stackedlol/ascii-sharks) (MIT, Copyright (c) 2026 drewdi). La escena se genera con `tools/gen_mosaic_scene.py`.
+La técnica de dibujar los tiburones celda por celda, con la rampa de caracteres `:;t%SX8#@` y los cardúmenes de rayitas, está adaptada de [stackedlol/ascii-sharks](https://github.com/stackedlol/ascii-sharks) (MIT, Copyright (c) 2026 drewdi). El shader está en `hooks/mosaic-shader.ts` (con una vista previa en `tools/preview_mosaic_shader.py`) y la versión SVG se genera con `tools/gen_mosaic_scene.py`.
 
 ## Licencia
 
