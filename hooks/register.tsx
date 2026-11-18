@@ -77,8 +77,9 @@ const THEMES: Record<string, Theme> = {
 // ── Elección guardada entre sesiones ─────────────────────────────────────
 
 type Choice = { id: string | null; still: boolean }
-const DEFAULT: Choice = { id: 'mosaico', still: false }
-const KEY = 'choice'
+const DEFAULT: Choice = { id: 'oncidium', still: false }
+// v2: con 0.4.1 la orquídea pasa a ser el tema de todos los chats; la elección vieja se ignora.
+const KEY = 'choice-v2'
 
 const readChoice = async ($: EngineInterface): Promise<Choice> => {
   const v = (await $.store.get(KEY)) as Partial<Choice> | undefined
