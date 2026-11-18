@@ -186,12 +186,13 @@ SHARKS = [
     (340, (1.04, 0.98, 0.88), True,  (1, 3, 5.0, 3.3, 2, 2), 84, 2.1),
 ]
 THICK = 1.25    # body width multiplier
+SLICE = 2        # cell columns per swaying slice (fewer animated groups, lighter to paint)
 WAVE = 5.2      # radians of wave along the body
 
 css = [
     "text{font:600 10px ui-monospace,Menlo,Consolas,monospace;text-anchor:middle}",
     ".k{animation-timing-function:ease-in-out;animation-iteration-count:infinite;"
-    "animation-direction:alternate;will-change:transform}",
+    "animation-direction:alternate}",
 ]
 amps = set()
 live, still = [], []
@@ -199,11 +200,11 @@ for i, (L, tint, hammer, rt, speed, period) in enumerate(SHARKS):
     cells = rasterise(L, hammer)
     by_col = {}
     for cell in cells:
-        by_col.setdefault(cell[0], []).append(cell)
+        by_col.setdefault(cell[0] // SLICE * SLICE, []).append(cell)
     slices_live, slices_still = [], []
     t_still = random.uniform(0, 2 * math.pi)
     for c in sorted(by_col):
-        s = max(0.0, -(c * CW + CW / 2) / L)
+        s = max(0.0, -(c * CW + SLICE * CW / 2) / L)
         amp = round(L * 0.05 * (0.12 + 0.88 * min(s, 1.1) ** 1.8))
         body = cells_svg(by_col[c], tint)
         # half a period per direction (alternate); the wave travels nose -> tail
@@ -221,13 +222,16 @@ for i, (L, tint, hammer, rt, speed, period) in enumerate(SHARKS):
     frames, length = route_keyframes(at)
     dur = length / speed
     css.append(f"@keyframes p{i}{{{frames}}}")
-    live.append(
-        f'<g style="animation:p{i} {dur:.1f}s linear {-random.uniform(0, dur):.1f}s infinite">'
-        f'{"".join(slices_live)}</g>')
-    # still: the shark at one point of its route, facing along it
+    # still pose: the shark at one point of its route, facing along it
     (x0, y0), (x1, y1) = at(t_still), at(t_still + 0.002)
-    ang = math.degrees(math.atan2(y1 - y0, x1 - x0))
-    still.append(f'<g transform="translate({x0:.0f} {y0:.0f}) rotate({ang:.1f})">{"".join(slices_still)}</g>')
+    pose = f'translate({x0:.0f} {y0:.0f}) rotate({math.degrees(math.atan2(y1 - y0, x1 - x0)):.1f})'
+    # The transform attribute is where the shark rests when the app turns animation
+    # off (reduced motion, software compositing: it injects animation:none); while
+    # the animation runs, its CSS transform wins over the attribute.
+    live.append(
+        f'<g transform="{pose}" style="animation:p{i} {dur:.1f}s linear {-random.uniform(0, dur):.1f}s infinite">'
+        f'{"".join(slices_live)}</g>')
+    still.append(f'<g transform="{pose}">{"".join(slices_still)}</g>')
 
 for a in sorted(amps):
     css.append(f"@keyframes s{a}{{from{{transform:translateY({-a}px)}}to{{transform:translateY({a}px)}}}}")
@@ -245,10 +249,11 @@ for j in range(4):
     css.append(f"@keyframes f{j}{{from{{transform:translate({a}px,{y0:.0f}px)}}to{{transform:translate({b}px,{y0:.0f}px)}}}}")
     css.append(f"@keyframes w{j}{{from{{transform:translateY(-{CH}px)}}to{{transform:translateY({CH}px)}}}}")
     txt = f'<text fill="#6f737c" x="{" ".join(map(str, xs))}" y="{" ".join(map(str, ys))}">{"-" * n}</text>'
+    rest = f'translate({random.uniform(0.1, 0.9) * W:.0f} {y0:.0f})'
     schools_live.append(
-        f'<g style="animation:f{j} {dur:.0f}s linear {-random.uniform(0, dur):.1f}s infinite">'
+        f'<g transform="{rest}" style="animation:f{j} {dur:.0f}s linear {-random.uniform(0, dur):.1f}s infinite">'
         f'<g style="animation:w{j} {random.uniform(3, 5):.1f}s ease-in-out infinite alternate">{txt}</g></g>')
-    schools_still.append(f'<g transform="translate({random.uniform(0.1, 0.9) * W:.0f} {y0:.0f})">{txt}</g>')
+    schools_still.append(f'<g transform="{rest}">{txt}</g>')
 
 # ── scattered faint dashes, slowly breathing ──
 dashes_live, dashes_still = [], []
@@ -257,7 +262,7 @@ for k in range(3):
     ys = [random.randrange(ROWS) * CH + CH - 4 for _ in range(40)]
     attrs = f'fill="#9a9da4" x="{" ".join(map(str, xs))}" y="{" ".join(map(str, ys))}">{"-" * 40}</text>'
     dashes_live.append(
-        f'<text style="animation:tw {random.uniform(5, 8):.1f}s ease-in-out {-k * 2.2:.1f}s infinite alternate" {attrs}')
+        f'<text opacity=".45" style="animation:tw {random.uniform(5, 8):.1f}s ease-in-out {-k * 2.2:.1f}s infinite alternate" {attrs}')
     dashes_still.append(f'<text opacity=".45" {attrs}')
 css.append("@keyframes tw{from{opacity:.15}to{opacity:.7}}")
 css.append("@media (prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}")
