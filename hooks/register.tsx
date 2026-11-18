@@ -2,6 +2,7 @@ import type { EngineInterface, Register, ThemeSetArgs } from 'claude-code'
 
 import { makeColors } from './make-colors.js'
 import { SCENE as MOSAIC, SCENE_STILL as MOSAIC_STILL } from './mosaic-scene'
+import { SCENE as ORCHID, SCENE_STILL as ORCHID_STILL } from './orchid-scene'
 
 // ── Temas ────────────────────────────────────────────────────────────────
 // Para agregar uno: una entrada aquí con sus colores y sus escenas.
@@ -24,6 +25,24 @@ const mosaicColors = makeColors({
   },
 })
 
+const orchidColors = makeColors({
+  label: 'Oncidium',
+  only: 'dark',
+  roles: { accent: '#e2b23a', danger: '#ea7c72', success: '#6fc39a', warning: '#e8a33a', pro: '#a993d8' },
+  dark: {
+    gray: {
+      anchors: {
+        'surface-0': '#0b0c0b',
+        'surface-1': '#151614',
+        'surface-2': '#1d1e1b',
+        'text-primary': '#efe9d8',
+        'text-secondary': '#c3bda9',
+        'text-muted': '#949082',
+      },
+    },
+  },
+})
+
 type Theme = {
   name: string
   description: string
@@ -31,6 +50,7 @@ type Theme = {
   scene: string
   sceneStill: string
   alt: string
+  tint: string
 }
 
 const THEMES: Record<string, Theme> = {
@@ -41,6 +61,16 @@ const THEMES: Record<string, Theme> = {
     scene: MOSAIC,
     sceneStill: MOSAIC_STILL,
     alt: 'Tiburones de mosaico ASCII nadando sobre papel cuadriculado',
+    tint: '#f7f7f5',
+  },
+  oncidium: {
+    name: 'Oncidium',
+    description: 'orquídea amarilla en glifos ASCII sobre negro, con destellos (oscuro)',
+    colors: orchidColors,
+    scene: ORCHID,
+    sceneStill: ORCHID_STILL,
+    alt: 'Orquídea Oncidium amarilla dibujada con caracteres ASCII sobre fondo negro',
+    tint: '#0b0c0b',
   },
 }
 
@@ -61,7 +91,7 @@ const look = (theme: Theme, id: string, still: boolean): ThemeSetArgs => ({
   colors: theme.colors.theme,
   backdrop: {
     scene: `${id}${still ? '-still' : ''}`,
-    glass: { blur: 6, tint: '#f7f7f5', opacity: 0.55 },
+    glass: { blur: 6, tint: theme.tint, opacity: 0.55 },
   },
 })
 
@@ -83,7 +113,7 @@ export const register: Register = on => {
     const result = await next(e)
     await $.command.register({
       name: 'my-themes',
-      description: 'Activa o desactiva tus temas: /my-themes, /my-themes mosaico [quieto], /my-themes off',
+      description: 'Activa o desactiva tus temas: /my-themes, /my-themes <mosaico|oncidium> [quieto], /my-themes off',
     })
     await apply($, await readChoice($))
     return result
@@ -109,7 +139,7 @@ export const register: Register = on => {
     if (words[0] === 'off' || words[0] === 'apagar') {
       await $.store.set(KEY, { id: null, still: false })
       await apply($, { id: null, still: false })
-      return { text: 'Tema desactivado. Escribe /my-themes mosaico para volver a activarlo.' }
+      return { text: 'Tema desactivado. Escribe /my-themes <tema> para volver a activarlo.' }
     }
 
     const id = words[0] ?? ''

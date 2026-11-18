@@ -1,7 +1,7 @@
 {
   "name": "my-themes",
-  "version": "0.3.2",
-  "description": "Tus temas para Claude: tiburones de mosaico ASCII (claro). Se activan con /my-themes",
+  "version": "0.4.0",
+  "description": "Tus temas para Claude: tiburones de mosaico ASCII (claro) y orquídea Oncidium (oscuro). Se activan con /my-themes",
   "author": { "name": "BN1ne" },
   "license": "MIT"
 }

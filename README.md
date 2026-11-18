@@ -7,6 +7,7 @@ Temas para las apps de escritorio y móvil de Claude Code, con un comando para a
 | Tema | Descripción |
 | --- | --- |
 | `mosaico` | Tiburones de mosaico ASCII (clásico, martillo y café moteado) que nadan en curvas sobre papel cuadriculado, con el cuerpo doblándose al girar, cardúmenes de rayitas y un resplandor alrededor del cuadro de texto. Modo claro. |
+| `oncidium` | Una orquídea Oncidium amarilla redibujada con glifos ASCII nítidos sobre negro, con resplandor, destellos que titilan y las lecturas técnicas (θ, X/Y, ∠) como texto real. Modo oscuro. |
 
 Los temas se ven en la app de escritorio y en el móvil. La terminal no dibuja temas.
 
@@ -31,6 +32,7 @@ claude plugin install my-themes --marketplace BN1ne/claude-themes
 - `/my-themes`: lista los temas y cuál está activo.
 - `/my-themes mosaico`: activa el tema animado.
 - `/my-themes mosaico quieto`: activa la versión sin animación, que casi no consume recursos.
+- `/my-themes oncidium`: activa la orquídea (oscuro). También acepta `quieto`.
 - `/my-themes off`: desactiva el tema y vuelve el aspecto normal de la app.
 
 Tu elección se recuerda entre sesiones. Si Windows o macOS tienen activado "reducir movimiento", el fondo se queda quieto.
@@ -40,6 +42,8 @@ Tu elección se recuerda entre sesiones. Si Windows o macOS tienen activado "red
 La escena es un SVG animado sin scripts. Cada tiburón se dibuja una vez, recto, y se corta en una tajada por columna de celdas. Cada tajada se mece arriba y abajo con un retraso que crece hacia la cola, así una onda recorre el cuerpo. El tiburón entero sigue una curva cerrada y suave (animación CSS, sin SMIL), así gira donde gira la curva.
 
 Con "reducir movimiento" la animación se detiene. `/my-themes mosaico quieto` usa una versión congelada, sin animación.
+
+La orquídea es una captura convertida en SVG con `python tools/gen_orchid_scene.py <captura.png> hooks/orchid-scene`. El marco del fondo no permite imágenes (CSP `img-src 'none'`), así que cada celda de la captura se vuelve un carácter que sigue la dirección de sus rayas, con el color limpiado y las lecturas blancas reescritas como texto.
 
 ## Créditos
 
